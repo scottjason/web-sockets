@@ -1,5 +1,5 @@
 var path = require('path');
-var config = require('./config'); var url = require('url'); 
+var config = require('./config');
 var express = require('express'); 
 var app = express();
 var port = config.server.port;
