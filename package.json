@@ -1,0 +1,32 @@
+{
+  "name": "web-sockets",
+  "version": "1.0.0",
+  "description": "WebSockets, Node.js, React.js",
+  "main": "./server/app.js",
+  "scripts": {
+    "start": "nodemon ./server/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scottjason/web-sockets.git"
+  },
+  "keywords": [
+    "web",
+    "sockets",
+    "node",
+    "react",
+    "pubsub"
+  ],
+  "author": "Scott Jason",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scottjason/web-sockets/issues"
+  },
+  "homepage": "https://github.com/scottjason/web-sockets#readme",
+  "dependencies": {
+    "ejs": "^2.3.4",
+    "express": "^4.13.3",
+    "nodemon": "^1.8.1",
+    "ws": "^0.8.1"
+  }
+}
