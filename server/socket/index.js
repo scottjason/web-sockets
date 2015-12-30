@@ -7,7 +7,7 @@ module.exports = function(app) {
   var wss = new WebSocketServer({ server: server });
 
   wss.on('connection', function connection(socket) {
-    var location = url.parse(socket.upgradeReq.url, true);
+
     socket.on('message', function incoming(message) {
       console.log('received: %s', message);
     });
