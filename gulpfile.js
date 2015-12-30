@@ -11,35 +11,57 @@ var stylesDir = './client/styles';
 var targetDir = './dist/';
 var entryPoint = 'main.js';
 
-if (!fs.existsSync(targetDir)){
+if (!fs.existsSync(targetDir)) {
   fs.mkdirSync(targetDir);
 }
 
+var getScripts = function() {
+  var results = []
+  var files = fs.readdirSync(scriptsDir);
+  files.forEach(function(file) {
+    file = scriptsDir + '/' + file;
+    var stat = fs.statSync(file);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(getScripts(file));
+    } else {
+      results.push(file);
+    }
+  });
+  return results;
+};
+
 gulp.task('buildScript', function(cb) {
-  return browserify({ entries: [scriptsDir + '/' + entryPoint], debug: true })
+  return browserify({
+      entries: [scriptsDir + '/' + entryPoint],
+      debug: true
+    })
     .transform(reactify)
     .bundle()
     .pipe(stream(entryPoint))
     .pipe(gulp.dest(targetDir))
-    cb();
+  cb();
 });
 
 gulp.task('copyStyles', function(cb) {
- return gulp.src(stylesDir + '*/**.css')
+  return gulp.src(stylesDir + '*/**.css')
     .pipe(flatten())
     .pipe(gulp.dest(targetDir))
-    cb();    
+  cb();
 });
 
 gulp.task('watch', function() {
-  gulp.watch(scriptsDir + '/' + "*/**.js", ['buildScript'])
+  gulp.watch(getScripts(), ['buildScript'])
   gulp.watch(stylesDir + '/' + "*.css", ['copyStyles']);
 });
 
 gulp.task('server', function() {
-  return nodemon({ script: 'server/app.js', ignore: ['client/**/*', 'dist/**/*'] }).on('start', function() {
-    console.log('Gulp Nodemon Started.');
-  });
+  return nodemon({ script: 'server/app.js', ext: 'js', ignore: ['client/', 'dist/'] })
+    .on('start', function() {
+      console.log('** Start ** Gulp Nodemon .');
+    })
+    .on('restart', function() {
+      console.log('** Restart ** Gulp Nodemon');
+    })
 });
 
 
