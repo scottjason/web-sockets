@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var gulp = require('gulp');
+var clean = require('gulp-clean');
 var stream = require('vinyl-source-stream');
 var nodemon = require('gulp-nodemon');
 var flatten = require('gulp-flatten');
@@ -8,28 +9,42 @@ var reactify = require('reactify');
 var recursive = require('recursive-readdir');
 var browserify = require('browserify');
 var runSequence = require('run-sequence');
+var colors = require('colors');
 
 var scriptsDir = './client/scripts';
 var stylesDir = './client/styles';
+var assetsDir = './client/assets';
 var targetDir = './dist/';
 var entryPoint = 'main.js';
 
 var scripts = [];
-
-if (!fs.existsSync(targetDir)) {
-  fs.mkdirSync(targetDir);
-}
 
 /**
   Tasks
 */
 
 gulp.task('default', function(cb) {
-  runSequence(['getScripts', 'copyStyles'], 'bundle', 'server', 'watch', cb);
+  runSequence('makeDir', 'clean', ['getScripts', 'copyStyles', 'copyAssets'], 'bundle', 'server', cb);
 });
 
 gulp.task('build', function(cb) {
-  runSequence(['getScripts', 'copyStyles'], 'bundle');
+  runSequence('makeDir', 'clean', ['getScripts', 'copyStyles', 'copyAssets'], 'bundle', cb);
+});
+
+/*
+  Make And Clean
+*/
+gulp.task('makeDir', function (cb) {
+  if (!fs.existsSync(targetDir)) {
+   fs.mkdirSync(targetDir);
+  }
+  cb();
+});
+
+gulp.task('clean', function (cb) {
+  return gulp.src('dist', { read: false })
+    .pipe(clean());
+    cb();
 });
 
 /**
@@ -49,8 +64,20 @@ gulp.task('getScripts', function(cb) {
 */
 
 gulp.task('copyStyles', function(cb) {
-  return gulp.src(stylesDir + '*/**.css')
+  console.log('** Copying Styles **'.magenta);
+  gulp.src(stylesDir + '*/**.css')
     .pipe(flatten())
+    .pipe(gulp.dest(targetDir))
+  cb();
+});
+
+/**
+  Copy Assets
+*/
+
+gulp.task('copyAssets', function(cb) {
+  console.log('** Copying Assets **'.magenta);
+  gulp.src(assetsDir + '*/**')
     .pipe(gulp.dest(targetDir))
   cb();
 });
@@ -60,10 +87,8 @@ gulp.task('copyStyles', function(cb) {
 */
 
 gulp.task('bundle', function(cb) {
-  return browserify({
-      entries: [scriptsDir + '/' + entryPoint],
-      debug: true
-    })
+  console.log('** Bundling Script **'.magenta);
+  browserify({ entries: [scriptsDir + '/' + entryPoint], debug: true })
     .transform(reactify)
     .bundle()
     .pipe(stream(entryPoint))
@@ -72,30 +97,31 @@ gulp.task('bundle', function(cb) {
 });
 
 /**
+  Watch Scripts and Styles, Bundle or Copy
+*/
+
+var watchFiles = function() {
+  console.log('** Watching Files **'.magenta);
+  gulp.watch(scripts, ['bundle'])
+  gulp.watch(stylesDir + '/' + "*.css", ['copyStyles']);
+  gulp.watch(assetsDir + '/styles/' + "*.css", ['copyAssets']);
+};
+
+/**
   Server
 */
 
-gulp.task('server', function(cb) {
-  return nodemon({
+gulp.task('server', function() {
+  nodemon({
       script: 'server/app.js',
       ext: 'js',
       ignore: ['client/', 'dist/']
     })
     .on('start', function() {
-      console.log('** Start ** Gulp Nodemon');
-      cb();
+      watchFiles();
+      console.log('** Start ** Gulp Nodemon'.green);
     })
     .on('restart', function() {
-      console.log('** Restart ** Gulp Nodemon');
-      cb();
+      console.log('** Restarting ** Gulp Nodemon'.green);
     })
-});
-
-/**
-  Watch Scripts and Styles, Bundle or Copy
-*/
-
-gulp.task('watch', function() {
-  gulp.watch(scripts, ['bundle'])
-  gulp.watch(stylesDir + '/' + "*.css", ['copyStyles']);
 });

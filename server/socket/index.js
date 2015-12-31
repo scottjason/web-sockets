@@ -1,4 +1,5 @@
 var url = require('url');
+var colors = require('colors');
 var server = require('http').createServer();
 var WebSocketServer = require('ws').Server;
 
@@ -16,6 +17,6 @@ module.exports = function(app) {
 
   server.on('request', app);
   server.listen(app.get('port'), function() {
-    console.log('Listening on ' + server.address().port);
+    console.log('Listening on port '.green + (server.address().port).toString().green);
   });
 };
