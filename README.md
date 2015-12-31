@@ -2,7 +2,7 @@
 
 ## Installation
 
-*Note, after install, follow these steps to fix the current issue in the react-styles node module:
+*Note, after install, follow these steps to fix the current issue in the react-style node module:
 
 https://github.com/js-next/react-style/pull/128/files
 
