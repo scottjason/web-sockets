@@ -27,12 +27,15 @@
   },
   "homepage": "https://github.com/scottjason/web-sockets#readme",
   "dependencies": {
+    "async": "^1.5.0",
+    "aws-sdk": "^2.2.26",
     "codemirror": "^5.10.0",
     "colors": "^1.1.2",
     "deep-equal": "^1.0.1",
     "ejs": "^2.3.4",
     "express": "^4.13.3",
     "fbjs": "^0.6.0",
+    "fluent-ffmpeg": "^2.0.1",
     "history": "^1.17.0",
     "lodash": "^3.10.1",
     "node-uuid": "^1.4.7",
@@ -42,6 +45,7 @@
     "react-dom": "^0.14.5",
     "react-router": "^1.0.3",
     "react-style": "^0.5.5",
+    "recordrtc-nodejs": "^1.0.0",
     "recursive-readdir": "^1.3.0",
     "reflux": "^0.3.0",
     "ws": "^0.8.1"

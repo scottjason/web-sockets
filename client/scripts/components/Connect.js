@@ -26,7 +26,7 @@ module.exports = React.createClass({
         <div styles={styles.container}>           
           <input id='room' styles={styles.roomInput} placeholder='ROOM NAME'></input>
           <div styles={styles.joinBtn} onClick={actions.createRoomName}>
-            <p styles={styles.joinCopy}>JOIN ROOM</p>
+            <p styles={styles.joinCopy}>JOIN</p>
           </div>          
         </div>
       </div>
@@ -42,7 +42,7 @@ var styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     padding: 15,
-    backgroundColor: '#1c262f'
+    backgroundColor: '#fff'
   },
   container: {
     display: 'flex',
@@ -53,19 +53,19 @@ var styles = StyleSheet.create({
     height: '100%'
   },
   roomInput: {
-    backgroundColor: '#1c262f',
+    backgroundColor: '#fff',
     border: 'none',
-    borderBottom: '1px solid #f9ffff',
+    borderBottom: '1px solid rgba(0, 0, 0, .3)',
     width: '240px',
     height: '35px',
-    color: '#f9ffff',
+    color: '#626c76',
     outline: 0,
     fontSize: '16px',
     textAlign: 'center'
   },
   joinBtn: {
-    backgroundColor: '#1c262f',
-    border: '1px solid #f9ffff',
+    backgroundColor: 'transparent',
+    border: '1px solid rgba(0, 0, 0, .3)',
     marginTop: '12px',
     width: '160px',
     height: '40px',
@@ -73,7 +73,7 @@ var styles = StyleSheet.create({
     cursor: 'pointer'
   },
   joinCopy: {
-    color: '#f9ffff',
+    color: '#626c76',
     fontSize: '16px',    
     letterSpacing: '1px',
     marginTop: 8

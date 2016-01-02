@@ -2,6 +2,7 @@ var Reflux = require('reflux');
 var actions = require('../actions');
 var uuid = require('node-uuid');
 
+var isFirefox = !!navigator.mozGetUserMedia;
 var state = {};
 
 module.exports = Reflux.createStore({
@@ -15,6 +16,36 @@ module.exports = Reflux.createStore({
     this.listenTo(actions.handleOffer, this.handleOffer);
     this.listenTo(actions.handleAnswer, this.handleAnswer);
     this.listenTo(actions.handleCandidate, this.handleCandidate);
+    this.listenTo(actions.stopRecording, this.stopRecording);
+  },
+  stopRecording: function() {
+    console.log('stop recording');
+    state.audioStream.stopRecording();
+    state.videoStream.stopRecording();
+    state.audioStream.getDataURL(function(audioDataURL) {
+      state.videoStream.getDataURL(function(videoDataURL) {
+        var files = {};
+        var fileName = uuid.v1();
+
+        files.audio = {
+          name: fileName + (isFirefox ? '.webm' : '.wav'),
+          type: isFirefox ? 'video/webm' : 'audio/wav',
+          contents: audioDataURL
+        };
+
+        if (!isFirefox) {
+          files.video = {
+            name: fileName + '.webm',
+            type: 'video/webm',
+            contents: videoDataURL
+          };
+        }
+
+        files.type = 'mergeAV';
+        files = JSON.stringify(files);
+        state.socket.send(files);
+      });
+    });
   },
   createRoomName: function() {
     this.trigger('onRoomNameCreated', document.getElementById('room').value);
@@ -26,7 +57,7 @@ module.exports = Reflux.createStore({
     this.trigger('onSocketReady', state.socket);
   },
   createRoom: function() {
-    console.debug("** Create Room **");    
+    console.debug("** Create Room **");
     var opts = {};
     opts.type = 'roomCreated';
     opts.roomName = state.roomName;
@@ -51,11 +82,7 @@ module.exports = Reflux.createStore({
       state.ownStream = stream;
       video.src = window.URL.createObjectURL(stream);
 
-      var config = {
-        iceServers: [{
-          url: 'stun:stun.l.google.com:19302'
-        }]
-      };
+      var config = { iceServers: [{ url: 'stun:stun.l.google.com:19302' }] };
       var peerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.msRTCPeerConnection;
 
       state.peer = new peerConnection(config);
@@ -65,6 +92,12 @@ module.exports = Reflux.createStore({
       state.stream = stream;
       container.appendChild(video);
       this.trigger('onStreamReady');
+
+      state.peer.oniceconnectionstatechange = function() {
+        if (state.peer.iceConnectionState == 'disconnected') {
+          console.log('Disconnected');
+        }
+      };
 
       state.peer.onicecandidate = function(e) {
         console.log('onicecandidate', e);
@@ -77,9 +110,10 @@ module.exports = Reflux.createStore({
         };
         message = JSON.stringify(message);
         state.socket.send(message);
-      }
+      };
 
       state.peer.onaddstream = function(event) {
+        
         state.peer.addStream(event.stream);
 
         var big = document.getElementById('big');
@@ -100,6 +134,12 @@ module.exports = Reflux.createStore({
         video.autoplay = true;
         video.muted = false;
         big.appendChild(video);
+
+        state.audioStream = RecordRTC(event.stream, { bufferSize: 16384 });
+        state.videoStream = RecordRTC(event.stream, { type: 'video' });
+
+        state.audioStream.startRecording();
+        state.videoStream.startRecording();
       };
     }
 
@@ -133,8 +173,7 @@ module.exports = Reflux.createStore({
   handleAnswer: function(message) {
     console.debug("** Handle Answer **");
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
-    state.peer.setRemoteDescription(new sessionDescription(message.payload), function() {
-    });
+    state.peer.setRemoteDescription(new sessionDescription(message.payload), function() {});
   },
   createOffer: function() {
     console.debug("** Create Offer **");
