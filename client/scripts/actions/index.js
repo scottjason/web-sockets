@@ -1,6 +1,13 @@
 var Reflux = require('reflux');
 
 module.exports = Reflux.createActions([
+  'createRoom',	
+  'createRoomName',	
+  'joinRoom',
   'openSocket',
-  'getRoom'
+  'getUserMedia',
+  'createOffer',
+  'handleOffer',
+  'handleAnswer',
+  'handleCandidate'
 ]);

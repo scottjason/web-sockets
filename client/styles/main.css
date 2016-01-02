@@ -9,7 +9,7 @@ body {
 
 body {
   font-family: 'Roboto Condensed', sans-serif;
-  background-color: #455A64;
+  background-color: #1c262f;
   margin: 0;
   padding: 0;
   outline: 0;
@@ -25,19 +25,19 @@ body {
 }
 
 ::-webkit-input-placeholder {
-  color: rgba(225, 225, 225, .4);
+  color: #626c76;
 }
 
 :-moz-placeholder {
-  color: rgba(225, 225, 225, .4);
+  color: #626c76;
 }
 
 ::-moz-placeholder {
-  color: rgba(225, 225, 225, .4);
+  color: #626c76;
 }
 
 :-ms-input-placeholder {
-  color: rgba(225, 225, 225, .4);
+  color: #626c76;
 }
 
 @font-face {
@@ -77,4 +77,8 @@ body {
   color: #9CFC97;
   font-size: 12px;
   margin-right: 220px;
+}
+video {
+  width: 75%;
+  height: 100%;
 }
