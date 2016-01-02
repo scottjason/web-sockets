@@ -23,7 +23,7 @@ module.exports = Reflux.createStore({
     this.trigger('onRoomNameCreated', document.getElementById('room').value);
   },
   openSocket: function(roomName) {
-    var url = 'ws://localhost:3000/' + roomName;    
+    var url = 'ws://localhost:3000/' + roomName;
     state.roomName = roomName;
     state.roomId = this.generateId();
     state.socket = new WebSocket(url);
@@ -40,26 +40,35 @@ module.exports = Reflux.createStore({
   },
   getUserMedia: function() {
 
-    var contstraints = { audio: true, video: true };
+    var contstraints = {
+      audio: true,
+      video: true
+    };
     navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia || navigator.msGetUserMedia;
     navigator.getUserMedia(contstraints, onSuccess.bind(this), onError.bind(this));
 
     function onSuccess(stream) {
 
-      var container = document.getElementById('small');
+      var container = document.getElementById('big');
       var video = document.createElement('video');
+      video.autoplay = true;
+      video.muted = true;
+      state.ownStream = stream;
       video.src = window.URL.createObjectURL(stream);
-      
-      var config = { iceServers: [{ url: 'stun:stun.l.google.com:19302' }] };      
+
+      var config = {
+        iceServers: [{
+          url: 'stun:stun.l.google.com:19302'
+        }]
+      };
       var peerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.msRTCPeerConnection;
-      
+
       state.peer = new peerConnection(config);
       state.peer.addStream(stream);
 
       state.video = video;
       state.stream = stream;
       container.appendChild(video);
-      video.play();
       this.trigger('onStreamReady');
 
       state.peer.onicecandidate = function(e) {
@@ -73,14 +82,28 @@ module.exports = Reflux.createStore({
         message = JSON.stringify(message);
         state.socket.send(message);
       }
-      
+
       state.peer.onaddstream = function(event) {
         state.peer.addStream(event.stream);
-        var container = document.getElementById('big');
+
+        var big = document.getElementById('big');
+        var small = document.getElementById('small');
+
+        var video = document.querySelector('video');
+
+        big.removeChild(video);
+
+        var video = document.createElement('video');
+        video.src = window.URL.createObjectURL(state.ownStream);
+        video.autoplay = true;
+        video.muted = true;
+        small.appendChild(video);
+
         var video = document.createElement('video');
         video.src = window.URL.createObjectURL(event.stream);
-        container.appendChild(video);
-        video.play();
+        video.autoplay = true;
+        video.muted = false;
+        big.appendChild(video);
       };
     }
 
@@ -89,7 +112,7 @@ module.exports = Reflux.createStore({
     }
   },
   handleOffer: function(event) {
-    
+
     var message = JSON.parse(event.data);
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
 
@@ -118,9 +141,9 @@ module.exports = Reflux.createStore({
     });
   },
   createOffer: function() {
-    
+
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
-    
+
     state.peer.createOffer(function(offer) {
       state.peer.setLocalDescription(new sessionDescription(offer), function() {
         var message = {
