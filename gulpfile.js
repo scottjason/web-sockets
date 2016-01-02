@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var gulp = require('gulp');
+var colors = require('colors');
 var clean = require('gulp-clean');
 var stream = require('vinyl-source-stream');
 var nodemon = require('gulp-nodemon');
@@ -9,7 +10,6 @@ var reactify = require('reactify');
 var recursive = require('recursive-readdir');
 var browserify = require('browserify');
 var runSequence = require('run-sequence');
-var colors = require('colors');
 
 var scriptsDir = './client/scripts';
 var stylesDir = './client/styles';
@@ -17,7 +17,7 @@ var assetsDir = './client/assets';
 var targetDir = './dist/';
 var entryPoint = 'main.js';
 
-var scripts = [];
+var scripts;;
 
 /**
   Tasks

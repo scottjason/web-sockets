@@ -3,32 +3,33 @@
 var Reflux = require('Reflux');
 var StyleSheet = require('react-style');
 var Navigation = require('react-router').Navigation;
-var SocketStore = require('../stores/SocketStore');
+var RoomStore = require('../stores/RoomStore');
 var actions = require('../actions');
 
 module.exports = React.createClass({
   mixins: [Reflux.ListenerMixin, Navigation],
   getInitialState: function() {
-    return {};
+    return { socket: actions.openSocket() };
   },
   componentDidMount: function() {
-    this.listenTo(SocketStore, this.onStateChange);
+    this.listenTo(RoomStore, this.onStateChange);
   },
   onStateChange: function(cb, data) {
     if (typeof this[cb] === 'function') this[cb](data);
   },
-  onEnterRoom: function(room) {
-    if (room.length) {
-      this.props.history.pushState(null, '/' + room);
-    }
+  onRoomNameCreated: function(roomName) {
+    if (roomName.length) this.props.history.pushState(null, '/' + roomName);
   },
   render: function() {
     return (
       <div styles={styles.wrapper}>                  
         <div styles={styles.container}>           
           <input id='room' styles={styles.roomInput} placeholder='ROOM NAME'></input>
-          <div styles={styles.joinBtn} onClick={actions.getRoom}>
-            <p styles={styles.joinCopy}>JOIN</p>
+          <div styles={styles.createBtn} onClick={actions.createRoomName}>
+            <p styles={styles.createCopy}>CREATE ROOM</p>
+          </div>          
+          <div styles={styles.createBtn} onClick={actions.createRoomName}>
+            <p styles={styles.createCopy}>JOIN ROOM</p>
           </div>
         </div>
       </div>
@@ -44,7 +45,7 @@ var styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     padding: 15,
-    backgroundColor: '##455A64'
+    backgroundColor: '#1c262f'
   },
   container: {
     display: 'flex',
@@ -55,29 +56,29 @@ var styles = StyleSheet.create({
     height: '100%'
   },
   roomInput: {
-    backgroundColor: '#455A64',
+    backgroundColor: '#1c262f',
     border: 'none',
-    borderBottom: '1px solid #CFD8DC',
+    borderBottom: '1px solid #f9ffff',
     width: '240px',
     height: '35px',
-    color: 'rgba(225, 225, 225, .9)',
+    color: '#f9ffff',
     outline: 0,
     fontSize: '16px',
     textAlign: 'center'
   },
-  joinBtn: {
-    backgroundColor: '#455A64',
-    border: '1px solid #CFD8DC',
+  createBtn: {
+    backgroundColor: '#1c262f',
+    border: '1px solid #f9ffff',
     marginTop: '12px',
-    width: '140px',
-    height: '30px',
+    width: '160px',
+    height: '40px',
     textAlign: 'center',
     cursor: 'pointer'
   },
-  joinCopy: {
-    color: '#CFD8DC',
-    fontSize: '14px',    
+  createCopy: {
+    color: '#f9ffff',
+    fontSize: '16px',    
     letterSpacing: '1px',
-    marginTop: 4
+    marginTop: 8
   }
 });
