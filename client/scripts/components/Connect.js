@@ -25,12 +25,9 @@ module.exports = React.createClass({
       <div styles={styles.wrapper}>                  
         <div styles={styles.container}>           
           <input id='room' styles={styles.roomInput} placeholder='ROOM NAME'></input>
-          <div styles={styles.createBtn} onClick={actions.createRoomName}>
-            <p styles={styles.createCopy}>CREATE ROOM</p>
+          <div styles={styles.joinBtn} onClick={actions.createRoomName}>
+            <p styles={styles.joinCopy}>JOIN ROOM</p>
           </div>          
-          <div styles={styles.createBtn} onClick={actions.createRoomName}>
-            <p styles={styles.createCopy}>JOIN ROOM</p>
-          </div>
         </div>
       </div>
     )
@@ -66,7 +63,7 @@ var styles = StyleSheet.create({
     fontSize: '16px',
     textAlign: 'center'
   },
-  createBtn: {
+  joinBtn: {
     backgroundColor: '#1c262f',
     border: '1px solid #f9ffff',
     marginTop: '12px',
@@ -75,7 +72,7 @@ var styles = StyleSheet.create({
     textAlign: 'center',
     cursor: 'pointer'
   },
-  createCopy: {
+  joinCopy: {
     color: '#f9ffff',
     fontSize: '16px',    
     letterSpacing: '1px',

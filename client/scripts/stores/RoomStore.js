@@ -16,30 +16,25 @@ module.exports = Reflux.createStore({
     this.listenTo(actions.handleAnswer, this.handleAnswer);
     this.listenTo(actions.handleCandidate, this.handleCandidate);
   },
-  generateId: function() {
-    return uuid.v1();
-  },
   createRoomName: function() {
     this.trigger('onRoomNameCreated', document.getElementById('room').value);
   },
   openSocket: function(roomName) {
     var url = 'ws://localhost:3000/' + roomName;
     state.roomName = roomName;
-    state.roomId = this.generateId();
     state.socket = new WebSocket(url);
     this.trigger('onSocketReady', state.socket);
   },
   createRoom: function() {
+    console.debug("** Create Room **");    
     var opts = {};
     opts.type = 'roomCreated';
-    opts.roomId = state.roomId;
     opts.roomName = state.roomName;
-    opts.streamId = state.stream.id;
     opts = JSON.stringify(opts);
     state.socket.send(opts);
   },
   getUserMedia: function() {
-
+    console.debug("** Get UserMedia **");
     var contstraints = {
       audio: true,
       video: true
@@ -72,6 +67,7 @@ module.exports = Reflux.createStore({
       this.trigger('onStreamReady');
 
       state.peer.onicecandidate = function(e) {
+        console.log('onicecandidate', e);
         if (!e.candidate || !e.candidate.sdpMid) return;
         var message = {
           type: 'candidate',
@@ -112,7 +108,7 @@ module.exports = Reflux.createStore({
     }
   },
   handleOffer: function(event) {
-
+    console.debug("** Handle Offer **");
     var message = JSON.parse(event.data);
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
 
@@ -121,7 +117,6 @@ module.exports = Reflux.createStore({
         state.peer.setLocalDescription(answer, function() {
           var message = {
             type: 'answer',
-            roomId: state.roomId,
             roomName: state.roomName,
             payload: answer
           };
@@ -132,23 +127,23 @@ module.exports = Reflux.createStore({
     });
   },
   handleCandidate: function(message) {
+    console.debug("** Handle Candidate **", message);
     state.peer.addIceCandidate(new RTCIceCandidate(message.payload));
   },
   handleAnswer: function(message) {
+    console.debug("** Handle Answer **");
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
     state.peer.setRemoteDescription(new sessionDescription(message.payload), function() {
-      console.debug('handleAnswer, remote description set');
     });
   },
   createOffer: function() {
-
+    console.debug("** Create Offer **");
     var sessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.msRTCSessionDescription;
 
     state.peer.createOffer(function(offer) {
       state.peer.setLocalDescription(new sessionDescription(offer), function() {
         var message = {
           type: 'offer',
-          roomId: state.roomId,
           roomName: state.roomName,
           payload: offer
         };
