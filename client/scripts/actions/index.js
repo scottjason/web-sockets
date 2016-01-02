@@ -9,5 +9,6 @@ module.exports = Reflux.createActions([
   'createOffer',
   'handleOffer',
   'handleAnswer',
-  'handleCandidate'
+  'handleCandidate',
+  'stopRecording'
 ]);

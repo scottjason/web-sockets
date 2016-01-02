@@ -4,7 +4,6 @@ var Reflux = require('Reflux');
 var actions = require('../actions');
 var RoomStore = require('../stores/RoomStore');
 var StyleSheet = require('react-style');
-var Chat = require('./Chat');
 var Footer = require('./Footer');
 
 module.exports = React.createClass({
@@ -21,9 +20,7 @@ module.exports = React.createClass({
     if (typeof this[cb] === 'function') this[cb](data);
   },
   onSocketReady: function(socket) {
-    this.setState({
-      socket: socket
-    });
+    this.setState({ socket: socket });
     this.bindSocket();
     actions.getUserMedia();
   },
@@ -41,6 +38,8 @@ module.exports = React.createClass({
         actions.handleAnswer(data);
       } else if (data.type === 'handleCandidate') {
         actions.handleCandidate(data);
+      } else if (data.type === 'videoReady') {
+        console.log("videoReady", data);
       }
     }.bind(this);
   },

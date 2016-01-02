@@ -15,9 +15,11 @@ var scriptsDir = './client/scripts';
 var stylesDir = './client/styles';
 var assetsDir = './client/assets';
 var targetDir = './dist/';
+var uploadsDir = './server/uploads';
 var entryPoint = 'main.js';
 
-var scripts;;
+var scripts;
+
 
 /**
   Tasks
@@ -31,20 +33,45 @@ gulp.task('build', function(cb) {
   runSequence('makeDir', 'clean', ['getScripts', 'copyStyles', 'copyAssets'], 'bundle', cb);
 });
 
+
+/*
+  Remove Files in Uploads Directory
+*/
+
+var removeUpload = function(path) {
+  console.log("path", path);
+  if (fs.existsSync(path)) {
+    console.log("path exists");
+    fs.readdirSync(path).forEach(function(file, index) {
+      var currentPath = path + "/" + file;
+      if (fs.lstatSync(currentPath).isDirectory()) {
+        removeUpload(currentPath);
+      } else {
+        fs.unlinkSync(currentPath);
+      }
+    });
+  }
+};
+
 /*
   Make And Clean
 */
-gulp.task('makeDir', function (cb) {
+
+gulp.task('makeDir', function(cb) {
+  removeUpload(uploadsDir);
   if (!fs.existsSync(targetDir)) {
-   fs.mkdirSync(targetDir);
+    fs.mkdirSync(targetDir);
   }
+
   cb();
 });
 
-gulp.task('clean', function (cb) {
-  return gulp.src('dist', { read: false })
+gulp.task('clean', function(cb) {
+  return gulp.src('dist', {
+      read: false
+    })
     .pipe(clean());
-    cb();
+  cb();
 });
 
 /**
@@ -88,7 +115,10 @@ gulp.task('copyAssets', function(cb) {
 
 gulp.task('bundle', function(cb) {
   console.log('** Bundling Script **'.magenta);
-  browserify({ entries: [scriptsDir + '/' + entryPoint], debug: true })
+  browserify({
+      entries: [scriptsDir + '/' + entryPoint],
+      debug: true
+    })
     .transform(reactify)
     .bundle()
     .pipe(stream(entryPoint))
