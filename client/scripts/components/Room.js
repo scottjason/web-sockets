@@ -45,13 +45,10 @@ module.exports = React.createClass({
   },
   render: function() {
     return (
-      <div styles={styles.wrapper}>    
-        <Chat/>
         <div id='container' styles={styles.container}>
           <div id='small' styles={styles.small}></div>
           <div id='big' styles={styles.big}></div>          
         </div>
-      </div>
     )
   }
 });
@@ -76,18 +73,20 @@ var styles = StyleSheet.create({
     paddingLeft: '30px'
   },
   big: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: '100%',
-    width: '100%',
-    marginLeft: '260px'
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    overflow: 'hidden',
+    width: '100%'
   },
   small: {
     position: 'absolute',
     top: '35px',
-    width: '320px',
-    height: '240px',
-    marginRight: '30px'
+    width: '240px',
+    height: '180px',
+    marginRight: '30px',
+    zIndex: 2
   }
 });
