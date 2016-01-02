@@ -1,4 +1,4 @@
-var url = require('url');
+var _ = require('lodash');
 var colors = require('colors');
 var server = require('http').createServer();
 var WebSocketServer = require('ws').Server;
@@ -15,68 +15,79 @@ module.exports = function(app) {
 
     socket.on('message', function incoming(message) {
 
-      console.log("message", message);
-
       message = JSON.parse(message);
-
       var type = message.type;
 
       if (type === 'roomCreated') {
 
+        // if the room's already been created
         if (rooms.hasOwnProperty(message.roomName)) {
-          
-          var opts = { type: 'createOffer' };
-          opts = JSON.stringify(opts);
 
-          rooms[message.roomName] = {
-            creatorStreamId: message.streamId,
-            guestSocket: socket
+          // see if there's already two people in there
+          var isTwoPeers = (rooms[message.roomName].length === 2);
+
+          if (isTwoPeers) {
+            var message = { type: 'roomOccupied' };
+            message = JSON.stringify(message);
+            socket.send(message);
+          } else {
+
+            // otherwise store the connection and tell the peer to create an offer
+            var peer = {};
+            peer.socket = socket;
+
+            rooms[message.roomName].push(peer);
+
+            var message = { type: 'createOffer' };
+            message = JSON.stringify(message);
+            socket.send(message);
+          }
+        } else {
+
+          // if the rooms hasn't yet been created
+          var peer = {};
+          peer.socket = socket;
+
+          rooms[message.roomName] = [];
+          rooms[message.roomName].push(peer);
+
+          var token = {
+            type: 'roomCreated',
+            roomName: message.roomName
           };
-          socket.send(opts);
-          return;
+
+          token = JSON.stringify(token);
+          socket.send(token);
         }
-
-        rooms[message.roomName] = {
-          creatorStreamId: message.streamId,
-          creatorSocket: socket
-        };
-
-        var token = {
-          type: 'roomCreated',
-          roomId: message.roomId,
-          roomName: message.roomName,
-          creatorStreamId: message.streamId
-        };
-
-        token = JSON.stringify(token);
-        wss.clients.forEach(function(client) {
-          client.send(token);
-        });
       } else if (type === 'offer') {
 
-        message.type = 'incomingOffer';
+        // send the offer/answer/candidate to all the peers in the room except for the originating peer
+        var roomName = message.roomName;
+        message.type = 'handleOffer';
         message = JSON.stringify(message);
-        wss.clients.forEach(function(client) {
-          var isGuestSocket = (socket === client);
-          if (isGuestSocket) return;
-          client.send(message);
+        _.forEach(rooms[roomName], function(peer) {
+          if (peer.socket !== socket) {
+            peer.socket.send(message)
+          }
         });
       } else if (type === 'answer') {
+        var roomName = message.roomName;
         message.type = 'handleAnswer';
         message = JSON.stringify(message);
-        wss.clients.forEach(function(client) {
-          var isMatch = (socket === client);
-          if (isMatch) return;
-          client.send(message);
+        _.forEach(rooms[roomName], function(peer) {
+          if (peer.socket !== socket) {
+            peer.socket.send(message)
+          }
         });
       } else
       if (type === 'candidate') {
+        var roomName = message.roomName;        
         message.type = 'handleCandidate';
         message = JSON.stringify(message);
-        wss.clients.forEach(function(client) {
-          var isMatch = (socket === client);
-          if (isMatch) return;
-          client.send(message);
+        _.forEach(rooms[roomName], function(peer) {
+          if (peer.socket !== socket) {
+            peer.socket.send(message)
+          }
         });
       }
     });
